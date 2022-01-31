@@ -1,7 +1,7 @@
 /*
  * @Author: Kejie Fu
  * @Date: 2022-01-08 22:48:27
- * @LastEditTime: 2022-01-31 02:44:17
+ * @LastEditTime: 2022-01-31 03:52:50
  * @LastEditors: Kejie Fu
  * @Description: 
  * @FilePath: /MeshAdaptationTensorField/src/main.cpp
@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
     parser.parseCMDLine(argc, argv);
     MeshMetric::Mesh mesh;
     
-    if(parser.translateFile){
+    if (parser.translateFile){
         mesh.loadMesh(parser.meshFile);
         mesh.loadTensorSol(parser.solFile);
         mesh.saveSol(parser.outSolFile);
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
 
 
 
-    mesh.generateMetricTensorField(parser.complexity, parser.normNumber);
+    mesh.generateMetricTensorField(parser.complexity, parser.normNumber, parser.hmin, parser.hmax);
     
     mesh.saveSol(parser.outSolFile);
     mesh.saveMet(parser.outMetFile);

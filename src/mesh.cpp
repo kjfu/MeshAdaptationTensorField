@@ -406,37 +406,51 @@ namespace MeshMetric{
         }
 
 
-        std:: vector<double> hessianNorms(nodes.rows());
+        std:: vector<double> hessianDets(nodes.rows());
         #pragma omp parallel for
         for (int i=0; i<nodes.rows(); i++){
-            hessianNorms[i] = nodeValueAbsoluteHessians[i].norm();
+            hessianDets[i] = nodeValueAbsoluteHessians[i].determinant();
         }
 
         double sum;
         for(int i=0; i<tets.rows();i++){
-            double averageNorm =0.25*(hessianNorms[tets(i,0)]+hessianNorms[tets(i,1)]+hessianNorms[tets(i,2)]+hessianNorms[tets(i,3)]);
-            sum+=pow(averageNorm, p/(2*p+3)) * tetVolumes[i];
+            double averageDet =0.25*(hessianDets[tets(i,0)]+hessianDets[tets(i,1)]+hessianDets[tets(i,2)]+hessianDets[tets(i,3)]);
+            sum+=pow(averageDet, p/(2*p+3)) * tetVolumes[i];
         }
         DL = pow(N, 2.0/3.0) * pow(sum, -2.0/3.0);
         std::cout << "DL = " << DL << std::endl;
     }
 
-    void Mesh::defineNodeMetricTensors(double p){
+    void Mesh::defineNodeMetricTensors(double p, double hmin, double hmax){
         nodeMetricTensors.resize(nodes.rows());
+        double hlmin = 1.0/(hmax*hmax);
+        double hlmax = 1.0/(hmin*hmin);
+        // std::cout << hlmin << "  " << hlmax << std::endl;
         #pragma omp parallel for
         for(int i = 0; i <nodes.rows(); i++){
-            nodeMetricTensors[i] = DL * pow(nodeValueAbsoluteHessians[i].norm(), -1.0/(2*p+3)) * nodeValueAbsoluteHessians[i];
+            Eigen::Matrix3d m = DL * pow(nodeValueAbsoluteHessians[i].determinant(), -1.0/(2*p+3)) * nodeValueAbsoluteHessians[i];
+            Eigen::EigenSolver<Eigen::Matrix3d> es(m);
+            Eigen::Matrix3d E = es.pseudoEigenvalueMatrix();
+            Eigen::Matrix3d V = es.pseudoEigenvectors();
+            for(int j=0; j<3; j++){
+                
+                E(j, j) = fmin(fmax(fabs(E(j,j)), hlmin), hlmax);
+                
+                // std::cout << E(j,j) << std::endl;
+            }
+            nodeMetricTensors[i] = V * E * V.transpose();
+        
         }
     }
 
-    void Mesh::generateMetricTensorField(double N, double p){
+    void Mesh::generateMetricTensorField(double N, double p, double hmin, double hmax){
         readyCalculation();
         calculateNodeValueGradients();
         calculateNodeValueHessians();
         // calculateNodeValueHessiansDirectly();
         calculateVolumes();
         calculateDL(N, p);
-        defineNodeMetricTensors(p);
+        defineNodeMetricTensors(p, hmin, hmax);
     }
 
     void Mesh::saveVtk(const std::string &filePath){
@@ -468,7 +482,7 @@ namespace MeshMetric{
         file << "SCALARS  det_metric double 1" << std::endl;
         file << "LOOKUP_TABLE default" << std::endl;
         for(int i=0; i<nodes.rows(); i++){
-            file << nodeMetricTensors[i].norm() << std::endl;
+            file << nodeMetricTensors[i].determinant() << std::endl;
         }
 
 

@@ -1,7 +1,7 @@
 /*
  * @Author: Kejie Fu
  * @Date: 2022-01-29 22:29:53
- * @LastEditTime: 2022-01-31 02:43:49
+ * @LastEditTime: 2022-01-31 03:50:25
  * @LastEditors: Kejie Fu
  * @Description: 
  * @FilePath: /MeshAdaptationTensorField/src/parser.cpp
@@ -42,7 +42,7 @@ bool Parser::parseCMDLine(int argc, char **argv){
         }
         else if (key=="-N"){
             i++;
-             complexity = std::stod(argv[i]);
+            complexity = std::stod(argv[i]);
         }
         else if (key=="-p"){
             i++;
@@ -50,6 +50,14 @@ bool Parser::parseCMDLine(int argc, char **argv){
         }
         else if (key=="-t"){
             translateFile = true;
+        }
+        else if (key=="-hmax"){
+            i++;
+            hmax = std::stod(argv[i]);
+        }
+        else if (key=="-hmin"){
+            i++;
+            hmin = std::stod(argv[i]);            
         }
         else if(key=="-h"||key=="--help"){
             std::cout << "$MeshAdaptationTensorField -in input.mesh -sol input.sol -N complexity -p norm" << std::endl;

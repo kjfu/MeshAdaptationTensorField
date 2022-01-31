@@ -1,7 +1,7 @@
 /*
  * @Author: Kejie Fu
  * @Date: 2022-01-08 22:54:46
- * @LastEditTime: 2022-01-31 02:39:23
+ * @LastEditTime: 2022-01-31 03:51:54
  * @LastEditors: Kejie Fu
  * @Description: 
  * @FilePath: /MeshAdaptationTensorField/src/mesh.h
@@ -43,14 +43,14 @@ public:
     void calculateNodeValueHessians();
     void calculateNodeValueHessiansDirectly();
     void calculateDL(double complexity, double norm);// N is complexity, and p is Lp norm
-    void defineNodeMetricTensors(double norm);
+    void defineNodeMetricTensors(double norm, double hmin, double hmax);
 
-    void generateMetricTensorField(double complexity,double norm);
+    void generateMetricTensorField(double complexity,double norm, double hmin, double hmax);
 
     void loadMesh(const std::string &filePath);
     void loadSol(const std::string &filePath);
     void loadTensorSol(const std::string &filePath);
-    
+
     void saveVtk(const std::string &filePath);
     void saveSol(const std::string &filePath);
     void saveMet(const std::string &filePath);
